@@ -28,9 +28,6 @@ namespace DiscordBot.Client
 
                 await _client.LoginAsync(TokenType.Bot, _config.Token);
                 await _client.StartAsync();
-
-                if (_client.ConnectionState == ConnectionState.Connected)
-                    await _redisStorage.Storage.StringSetAsync("StartedAt", DateTime.UtcNow.ToString("O"));
                 
                 await Task.Delay(-1);
             }
@@ -39,14 +36,18 @@ namespace DiscordBot.Client
         private void ConfigureEvents()
         {
             _client.Log += Log;
-            _client.Ready += () => Log(new LogMessage(LogSeverity.Info, nameof(_client), "Ready to work!"));
+            _client.Ready += async () =>
+            {
+                await _redisStorage.Storage.StringSetAsync("StartedAt", DateTime.UtcNow.ToString("O"));
+                await Log(new LogMessage(LogSeverity.Info, nameof(_client), "Ready to work!"));
+            };
 
             _client.MessageReceived += OnClientOnMessageReceived;
         }
 
         private Task OnClientOnMessageReceived(SocketMessage msg)
         {
-            return msg.Author.Equals(_client.CurrentUser)
+            return msg.Author.IsBot
                 ? Task.CompletedTask
                 : msg.Channel.SendMessageAsync($"Received: {msg.Content} from {msg.Author.Username}");
         }

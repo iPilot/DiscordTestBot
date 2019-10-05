@@ -20,6 +20,7 @@ namespace DiscordBot
             var services = new ServiceCollection();
             services.AddSingleton(new BotConfig());
             services.AddSingleton<IRedisStorage, RedisStorage>();
+            services.AddSingleton<DiscordClient>();
 
             return services.BuildServiceProvider();
         }
