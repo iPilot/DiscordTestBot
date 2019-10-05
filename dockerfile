@@ -7,4 +7,4 @@ ENV LANG C.UTF-8
 WORKDIR app
 COPY build .
 
-ENTRYPOINT ["dotnet", "DexBee.Sport.Hub.Listener.dll"]
+ENTRYPOINT ["dotnet", "DiscordBot.dll"]

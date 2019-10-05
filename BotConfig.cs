@@ -1,14 +1,13 @@
-﻿using System.IO;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Configuration;
 
 namespace DiscordBot
 {
     public class BotConfig
     {
-        private readonly string _fileName;
+        private readonly IConfiguration _configuration;
 
-        public string Token { get; private set; }
+        public string Token { get; }
+        public string RedisConnectionString { get; }
 
         public BotConfig() : this("config.json")
         {
@@ -16,19 +15,11 @@ namespace DiscordBot
 
         public BotConfig(string fileName)
         {
-            _fileName = fileName;
+            _configuration = new ConfigurationBuilder().AddJsonFile(fileName).Build();
+            Token = _configuration["Token"];
+            RedisConnectionString = _configuration["Redis"];
         }
 
-        public async Task LoadAsync()
-        {
-            var text = await File.ReadAllTextAsync(_fileName);
-            var tmp = JsonConvert.DeserializeObject<ConfigModel>(text);
-            Token = tmp.Token;
-        }
-    }
-
-    public class ConfigModel
-    {
-        public string Token { get; set; }
+        public T Get<T>(string key) => _configuration.GetSection(key).Get<T>();
     }
 }

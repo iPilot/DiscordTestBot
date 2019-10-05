@@ -1,34 +1,24 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DiscordBot
 {
-    public class Program
+    public static class Program
     {
         public static async Task Main(string[] args)
         {
-            var botConfig = new BotConfig();
-            await botConfig.LoadAsync();
-
-            using (var client = new DiscordSocketClient())
-            {
-                client.Log += Log;
-                await client.LoginAsync(TokenType.Bot, botConfig.Token);
-                await client.StartAsync();
-
-                var commands = new CommandService();
-                
-                await Task.Delay(-1);
-            }
+            var provider = ConfigureServiceProvider();
+            await provider.GetRequiredService<Client>().Run();
         }
 
-        private static Task Log(LogMessage message)
+        private static IServiceProvider ConfigureServiceProvider()
         {
-            Console.WriteLine(message.ToString());
-            return Task.CompletedTask;
+            var services = new ServiceCollection();
+            services.AddSingleton(new BotConfig());
+            services.AddSingleton<IRedisStorage, RedisStorage>();
+
+            return services.BuildServiceProvider();
         }
     }
 }
