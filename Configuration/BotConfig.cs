@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 
-namespace DiscordBot
+namespace DiscordBot.Configuration
 {
     public class BotConfig
     {

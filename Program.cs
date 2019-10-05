@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
+using DiscordBot.Client;
+using DiscordBot.Configuration;
+using DiscordBot.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DiscordBot
@@ -9,7 +12,7 @@ namespace DiscordBot
         public static async Task Main(string[] args)
         {
             var provider = ConfigureServiceProvider();
-            await provider.GetRequiredService<Client>().Run();
+            await provider.GetRequiredService<DiscordClient>().Run();
         }
 
         private static IServiceProvider ConfigureServiceProvider()

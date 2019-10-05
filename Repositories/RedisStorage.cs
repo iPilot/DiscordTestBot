@@ -1,6 +1,7 @@
-﻿using StackExchange.Redis;
+﻿using DiscordBot.Configuration;
+using StackExchange.Redis;
 
-namespace DiscordBot
+namespace DiscordBot.Repositories
 {
     public class RedisStorage : IRedisStorage
     {
