@@ -7,7 +7,7 @@ namespace DiscordBot.Configuration
         private readonly IConfiguration _configuration;
 
         public string Token { get; }
-        public string RedisConnectionString { get; }
+        public RedisConfiguration RedisConfiguration { get; }
 
         public BotConfig() : this("config.json")
         {
@@ -15,9 +15,12 @@ namespace DiscordBot.Configuration
 
         public BotConfig(string fileName)
         {
-            _configuration = new ConfigurationBuilder().AddJsonFile(fileName).Build();
+            _configuration = new ConfigurationBuilder()
+                .AddJsonFile(fileName)
+                .Build();
+
             Token = _configuration["Token"];
-            RedisConnectionString = _configuration["Redis"];
+            RedisConfiguration = Get<RedisConfiguration>("Redis");
         }
 
         public T Get<T>(string key) => _configuration.GetSection(key).Get<T>();
