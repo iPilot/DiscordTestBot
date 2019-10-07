@@ -20,11 +20,11 @@ namespace PochinkiBot.Client
         private readonly IPidorStore _pidorStore;
         private readonly DiscordSocketClient _client;
 
-        private const string RoulettePattern = @"рулетка!$";
-        private const string StatsPattern = @"статистика!$";
-        private const string WhoPidorPattern = @"кто пидор?";
-        private const string AmIPidorPattern = @"я пидор?";
-        private const string GuildPidorTopPattern = @"перепись пидоров";
+        private const string RoulettePattern = @"^рулетка!$";
+        private const string StatsPattern = @"^статистика!$";
+        private const string WhoPidorPattern = @"^кто пидор\?$";
+        private const string AmIPidorPattern = @"^я пидор\?$";
+        private const string GuildPidorTopPattern = @"^перепись пидоров$";
 
         private bool _pidorSearchActive;
 
