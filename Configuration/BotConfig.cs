@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 
-namespace DiscordBot.Configuration
+namespace PochinkiBot.Configuration
 {
     public class BotConfig
     {

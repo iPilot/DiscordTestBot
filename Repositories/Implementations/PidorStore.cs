@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DiscordBot.Repositories.Interfaces;
+using PochinkiBot.Repositories.Interfaces;
 using StackExchange.Redis;
 
-namespace DiscordBot.Repositories.Implementations
+namespace PochinkiBot.Repositories.Implementations
 {
     public class PidorStore : IPidorStore
     {

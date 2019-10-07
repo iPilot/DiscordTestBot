@@ -1,4 +1,4 @@
-﻿namespace DiscordBot.Configuration
+﻿namespace PochinkiBot.Configuration
 {
     public class RedisConfiguration
     {

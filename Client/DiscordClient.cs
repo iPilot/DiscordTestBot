@@ -7,10 +7,10 @@ using Discord;
 using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
-using DiscordBot.Configuration;
-using DiscordBot.Repositories.Interfaces;
+using PochinkiBot.Configuration;
+using PochinkiBot.Repositories.Interfaces;
 
-namespace DiscordBot.Client
+namespace PochinkiBot.Client
 {
     public class DiscordClient
     {

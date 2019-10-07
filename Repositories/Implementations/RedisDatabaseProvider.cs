@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
-using DiscordBot.Configuration;
-using DiscordBot.Repositories.Interfaces;
+using PochinkiBot.Configuration;
+using PochinkiBot.Repositories.Interfaces;
 using StackExchange.Redis;
 
-namespace DiscordBot.Repositories.Implementations
+namespace PochinkiBot.Repositories.Implementations
 {
     public class RedisDatabaseProvider : IRedisDatabaseProvider
     {

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using DiscordBot.Client;
-using DiscordBot.Configuration;
-using DiscordBot.Repositories.Implementations;
-using DiscordBot.Repositories.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using PochinkiBot.Client;
+using PochinkiBot.Configuration;
+using PochinkiBot.Repositories.Implementations;
+using PochinkiBot.Repositories.Interfaces;
 
-namespace DiscordBot
+namespace PochinkiBot
 {
     public static class Program
     {

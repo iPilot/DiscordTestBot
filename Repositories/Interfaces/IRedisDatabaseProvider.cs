@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using StackExchange.Redis;
 
-namespace DiscordBot.Repositories.Interfaces
+namespace PochinkiBot.Repositories.Interfaces
 {
     public interface IRedisDatabaseProvider
     {

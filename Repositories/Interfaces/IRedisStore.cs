@@ -1,4 +1,4 @@
-﻿namespace DiscordBot.Repositories.Interfaces
+﻿namespace PochinkiBot.Repositories.Interfaces
 {
     public interface IRedisStore
     {

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using DiscordBot.Repositories.Interfaces;
+using PochinkiBot.Repositories.Interfaces;
 
-namespace DiscordBot.Repositories.Implementations
+namespace PochinkiBot.Repositories.Implementations
 {
     public class RouletteRedisStore : IRouletteStore
     {

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
 
-namespace DiscordBot.Client
+namespace PochinkiBot.Client
 {
     public class CommandHandler
 {
