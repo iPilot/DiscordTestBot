@@ -1,10 +1,9 @@
-FROM microsoft/dotnet:3.0.0-core-runtime-alpine
+FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS build
+WORKDIR /app
+RUN dotnet publish -c Release -o out
 
-RUN apk update
-RUN apk add curl
-ENV LANG C.UTF-8
+FROM mcr.microsoft.com/dotnet/core/runtime:3.0 AS runtime
+WORKDIR /app
+COPY --from=build /app/out ./
 
-WORKDIR app
-COPY build .
-
-ENTRYPOINT ["dotnet", "DiscordBot.dll"]
+ENTRYPOINT ["dotnet", "PochinkiBot.dll"]

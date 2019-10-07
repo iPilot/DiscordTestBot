@@ -4,14 +4,14 @@ using PochinkiBot.Repositories.Interfaces;
 
 namespace PochinkiBot.Repositories.Implementations
 {
-    public class RouletteRedisStore : IRouletteStore
+    public class RouletteStore : IRouletteStore
     {
         private static string GetGuildWinsStatsKey(ulong guildId) => $"RouletteStats:{guildId}:Wins";
         private static string GetGuildLosesStatsKey(ulong guildId) => $"RouletteStats:{guildId}:Loses";
 
         private readonly IRedisDatabaseProvider _redisDatabaseProvider;
 
-        public RouletteRedisStore(IRedisDatabaseProvider redisDatabaseProvider)
+        public RouletteStore(IRedisDatabaseProvider redisDatabaseProvider)
         {
             _redisDatabaseProvider = redisDatabaseProvider;
         }
