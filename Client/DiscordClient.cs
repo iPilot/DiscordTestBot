@@ -7,6 +7,7 @@ using Discord;
 using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
+using PochinkiBot.Background;
 using PochinkiBot.Configuration;
 using PochinkiBot.Repositories.Interfaces;
 
@@ -18,6 +19,7 @@ namespace PochinkiBot.Client
         private readonly IRedisDatabaseProvider _redisDatabaseProvider;
         private readonly IRouletteStore _rouletteStore;
         private readonly IPidorStore _pidorStore;
+        private readonly BackgroundJobHandler _backgroundJobHandler;
         private readonly DiscordSocketClient _client;
 
         private const string RoulettePattern = @"^рулетка!$";
@@ -30,12 +32,13 @@ namespace PochinkiBot.Client
 
         private readonly Random _rng = new Random((int)DateTime.UtcNow.Ticks);
 
-        public DiscordClient(BotConfig config, IRedisDatabaseProvider redisDatabaseProvider, IRouletteStore rouletteStore, IPidorStore pidorStore)
+        public DiscordClient(BotConfig config, IRedisDatabaseProvider redisDatabaseProvider, IRouletteStore rouletteStore, IPidorStore pidorStore, BackgroundJobHandler backgroundJobHandler)
         {
             _config = config;
             _redisDatabaseProvider = redisDatabaseProvider;
             _rouletteStore = rouletteStore;
             _pidorStore = pidorStore;
+            _backgroundJobHandler = backgroundJobHandler;
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 AlwaysDownloadUsers = true,
@@ -77,19 +80,19 @@ namespace PochinkiBot.Client
 
                 var content = msg.Content.Substring(pos);
 
-                if (Regex.IsMatch(content, RoulettePattern))
+                if (Regex.IsMatch(content, RoulettePattern, RegexOptions.IgnoreCase))
                     await PlayRoulette(userMessage);
 
-                if (Regex.IsMatch(content, StatsPattern))
+                if (Regex.IsMatch(content, StatsPattern, RegexOptions.IgnoreCase))
                     await GetStats(userMessage);
 
-                if (Regex.IsMatch(content, WhoPidorPattern))
+                if (Regex.IsMatch(content, WhoPidorPattern, RegexOptions.IgnoreCase))
                     await WhoIsPidor(userMessage);
 
-                if (Regex.IsMatch(content, AmIPidorPattern))
+                if (Regex.IsMatch(content, AmIPidorPattern, RegexOptions.IgnoreCase))
                     await AmIPidor(userMessage);
 
-                if (Regex.IsMatch(content, GuildPidorTopPattern))
+                if (Regex.IsMatch(content, GuildPidorTopPattern, RegexOptions.IgnoreCase))
                     await GuildPidorTop(userMessage);
             });
 
@@ -143,6 +146,7 @@ namespace PochinkiBot.Client
             {
                 var context = new SocketCommandContext(_client, userMessage);
                 var guildPidor = await _pidorStore.GetCurrentGuildPidor(context.Guild.Id);
+                var role = context.Guild.Roles.FirstOrDefault(r => r.Name.Equals("Пидор дня", StringComparison.OrdinalIgnoreCase));
                 SocketGuildUser user = null;
                 if (guildPidor != null)
                 {
@@ -150,7 +154,7 @@ namespace PochinkiBot.Client
 
                     if (user != null)
                     {
-                        await userMessage.Channel.SendMessageAsync($"Пидор сегодня - **{user.Nickname ?? user.Username}**.");
+                        await userMessage.Channel.SendMessageAsync($"A пидор сегодня - **{user.Username}**.");
                     }
                     else
                     {
@@ -178,7 +182,7 @@ namespace PochinkiBot.Client
                     await _pidorStore.RemoveGuildPidorParticipant(context.Guild.Id, pretended);
                 }
 
-                await _pidorStore.SetGuildPidor(context.Guild.Id, user.Id);
+                var pidorOfTheDayExpires = await _pidorStore.SetGuildPidor(context.Guild.Id, user.Id);
                 await userMessage.Channel.SendMessageAsync("Начинаю поиск пидора...");
                 await Task.Delay(1500);
                 await userMessage.Channel.SendMessageAsync("Анализирую коренных жителей Починок...");
@@ -189,6 +193,11 @@ namespace PochinkiBot.Client
                 await Task.Delay(1500);
                 await userMessage.Channel.SendMessageAsync($"И пидор сегодня - <@{user.Id}>!");
 
+                if (role != null)
+                {
+                    await user.AddRoleAsync(role, new RequestOptions {AuditLogReason = "Пидор дня!"});
+                    _backgroundJobHandler.Enqueue(() => user.RemoveRoleAsync(role, new RequestOptions{AuditLogReason = "Больше не пидор дня."}), pidorOfTheDayExpires);
+                }
             }
             finally
             {

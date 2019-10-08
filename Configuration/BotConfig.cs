@@ -8,6 +8,7 @@ namespace PochinkiBot.Configuration
 
         public string Token { get; }
         public RedisConfiguration RedisConfiguration { get; }
+        public int PidorLengthSeconds { get; }
 
         public BotConfig() : this("config.json")
         {
@@ -21,6 +22,7 @@ namespace PochinkiBot.Configuration
 
             Token = _configuration["Token"];
             RedisConfiguration = Get<RedisConfiguration>("Redis");
+            PidorLengthSeconds = Get<int>(nameof(PidorLengthSeconds));
         }
 
         public T Get<T>(string key) => _configuration.GetSection(key).Get<T>();

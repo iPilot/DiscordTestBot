@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using PochinkiBot.Background;
 using PochinkiBot.Client;
 using PochinkiBot.Configuration;
 using PochinkiBot.Repositories.Implementations;
@@ -25,6 +26,9 @@ namespace PochinkiBot
                 return;
             }
 
+            var jobHandler = provider.GetRequiredService<BackgroundJobHandler>();
+            jobHandler.Run();
+
             await provider.GetRequiredService<DiscordClient>().Run();
         }
 
@@ -40,6 +44,8 @@ namespace PochinkiBot
                 .AddClasses(c => c.AssignableTo<IRedisStore>())
                 .AsImplementedInterfaces()
                 .WithSingletonLifetime());
+
+            services.AddScoped<BackgroundJobHandler>();
 
             var provider = services.BuildServiceProvider();
             services.AddSingleton(provider);

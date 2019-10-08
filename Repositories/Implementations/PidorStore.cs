@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PochinkiBot.Configuration;
 using PochinkiBot.Repositories.Interfaces;
 using StackExchange.Redis;
 
@@ -10,13 +11,15 @@ namespace PochinkiBot.Repositories.Implementations
     public class PidorStore : IPidorStore
     {
         private readonly IRedisDatabaseProvider _redisDatabase;
+        private readonly BotConfig _configuration;
         private static string GuildCurrentPidorKey(ulong guildId) => $"Pidors:Current:{guildId}";
         private static string GuildPidorStatsKey(ulong guildId) => $"Pidors:Stats:{guildId}";
         private static string GuildPidorParticipants(ulong guildId) => $"Pidors:Participants:{guildId}";
 
-        public PidorStore(IRedisDatabaseProvider redisDatabase)
+        public PidorStore(IRedisDatabaseProvider redisDatabase, BotConfig configuration)
         {
             _redisDatabase = redisDatabase;
+            _configuration = configuration;
         }
 
         public async Task<ulong?> GetCurrentGuildPidor(ulong guildId)
@@ -27,11 +30,15 @@ namespace PochinkiBot.Repositories.Implementations
                 : (ulong?) null;
         }
 
-        public async Task SetGuildPidor(ulong guildId, ulong userId)
+        public async Task<TimeSpan> SetGuildPidor(ulong guildId, ulong userId)
         {
-            var now = DateTime.UtcNow.Date;
-            await _redisDatabase.Database.StringSetAsync(GuildCurrentPidorKey(guildId), userId, now.AddDays(1).AddHours(7) - DateTime.UtcNow);
+            var now = DateTime.UtcNow;
+            var expiration = _configuration.PidorLengthSeconds > 0 
+                ? TimeSpan.FromSeconds(_configuration.PidorLengthSeconds) 
+                : now.Date.AddHours(24 + 7) - now;
+            await _redisDatabase.Database.StringSetAsync(GuildCurrentPidorKey(guildId), userId, expiration);
             await _redisDatabase.Database.HashIncrementAsync(GuildPidorStatsKey(guildId), userId);
+            return expiration;
         }
 
         public Task<bool> AddGuildPidorParticipant(ulong guildId, ulong userId)
