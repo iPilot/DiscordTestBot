@@ -154,7 +154,7 @@ namespace PochinkiBot.Client
 
                     if (user != null)
                     {
-                        await userMessage.Channel.SendMessageAsync($"A пидор сегодня - **{user.Username}**.");
+                        await userMessage.Channel.SendMessageAsync($"A пидор сегодня - **{user.Nickname ?? user.Username}{(user.Nickname != null ? $" ({user.Username})" : "")}**.");
                     }
                     else
                     {
@@ -183,6 +183,7 @@ namespace PochinkiBot.Client
                 }
 
                 var pidorOfTheDayExpires = await _pidorStore.SetGuildPidor(context.Guild.Id, user.Id);
+                
                 await userMessage.Channel.SendMessageAsync("Начинаю поиск пидора...");
                 await Task.Delay(1500);
                 await userMessage.Channel.SendMessageAsync("Анализирую коренных жителей Починок...");
@@ -192,11 +193,17 @@ namespace PochinkiBot.Client
                 await userMessage.Channel.SendMessageAsync("Нашел!");
                 await Task.Delay(1500);
                 await userMessage.Channel.SendMessageAsync($"И пидор сегодня - <@{user.Id}>!");
-
+                
                 if (role != null)
                 {
+                    var guildName = context.Guild.Name;
+                    Console.WriteLine($"Added role {role.Name} to user {user.Username} at server {guildName}.");
                     await user.AddRoleAsync(role, new RequestOptions {AuditLogReason = "Пидор дня!"});
-                    _backgroundJobHandler.Enqueue(() => user.RemoveRoleAsync(role, new RequestOptions{AuditLogReason = "Больше не пидор дня."}), pidorOfTheDayExpires);
+                    _backgroundJobHandler.Enqueue(() =>
+                    {
+                        Console.WriteLine($"Removed role \"{role.Name}\" of user {user.Username} at server \"{guildName}\".");
+                        return user.RemoveRoleAsync(role, new RequestOptions {AuditLogReason = "Больше не пидор дня."});
+                    }, pidorOfTheDayExpires);
                 }
             }
             finally

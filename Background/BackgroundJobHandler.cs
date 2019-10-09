@@ -76,6 +76,7 @@ namespace PochinkiBot.Background
             };
 
             _jobQueue.TryAdd(item.Id, item);
+            Console.WriteLine($"Job {{{item.Id}}} will executed at ~{item.Time:s}.");
         }
     }
 }
