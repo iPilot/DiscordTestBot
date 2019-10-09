@@ -40,7 +40,7 @@ namespace PochinkiBot.Background
         {
             while (!_isCancellationRequested)
             {
-                Thread.Sleep(10);
+                Thread.Sleep(2500);
                 if (_isCancellationRequested)
                     return;
 
