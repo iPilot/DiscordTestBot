@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using PochinkiBot.Configuration;
 using PochinkiBot.Repositories.Interfaces;
 using StackExchange.Redis;
@@ -9,43 +8,21 @@ namespace PochinkiBot.Repositories.Implementations
     public class RedisDatabaseProvider : IRedisDatabaseProvider
     {
         private readonly BotConfig _config;
-        private ConnectionMultiplexer _connection;
+        private readonly IRedisConnectionProvider _provider;
 
-        public RedisDatabaseProvider(BotConfig config)
+        public RedisDatabaseProvider(BotConfig config, IRedisConnectionProvider provider)
         {
             _config = config;
+            _provider = provider;
         }
          
-        public async Task<bool> TryConnect()
-        {
-            if (_connection != null && _connection.IsConnected)
-                return true;
-
-            try
-            {
-                _connection = await ConnectionMultiplexer.ConnectAsync(new ConfigurationOptions
-                {
-                    EndPoints = { _config.RedisConfiguration.Host },
-                    DefaultDatabase = _config.RedisConfiguration.Database,
-                    SyncTimeout = _config.RedisConfiguration.Timeout
-                }, Console.Out);
-
-                return true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Exception: {0}. Message: {1}. StackTrace: {2}.", e.GetType().Name, e.Message, e.StackTrace);
-                return false;
-            }
-        }
-
         public IDatabase Database
         {
             get
             {
-                if (!_connection.IsConnected)
+                if (!_provider.Connection.IsConnected)
                     throw new InvalidOperationException("Not connected.");
-                return _connection.GetDatabase();
+                return _provider.Connection.GetDatabase(_config.RedisConfiguration.Database);
             }
         }
     }

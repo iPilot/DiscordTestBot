@@ -1,82 +1,45 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
+using Hangfire;
 
 namespace PochinkiBot.Background
 {
     public class BackgroundJobHandler
     {
-        private class WorkItem
+        private readonly Thread _jobThread;
+        private readonly CancellationTokenSource _tokenSource;
+
+        public BackgroundJobHandler()
         {
-            public Guid Id { get; } = Guid.NewGuid();
-            public Func<Task> Work { get; set; }
-            public DateTime Time { get; set; }
-
-            public override bool Equals(object obj)
-            {
-                return Id.Equals(obj);
-            }
-
-            public override int GetHashCode()
-            {
-                return Id.GetHashCode();
-            }
+            _jobThread = new Thread(JobProcessing);
+            _tokenSource = new CancellationTokenSource();
         }
-        
-        private Thread _jobThread;
-        private bool _isCancellationRequested;
-        private readonly ConcurrentDictionary<Guid, WorkItem> _jobQueue = new ConcurrentDictionary<Guid, WorkItem>();
 
         public void Run()
         {
             AppDomain.CurrentDomain.ProcessExit += (sender, eventArgs) => Stop();
-            _jobThread = new Thread(JobProcessing);
             _jobThread.Start();
         }
 
-        private void JobProcessing()
+        private async void JobProcessing()
         {
-            while (!_isCancellationRequested)
+            var options = new BackgroundJobServerOptions
             {
-                Thread.Sleep(2500);
-                if (_isCancellationRequested)
-                    return;
+                WorkerCount = 1,
+                ServerName = "Pochinki-Bot",
+                SchedulePollingInterval = TimeSpan.FromSeconds(10)
+            };
 
-                var expired = new HashSet<WorkItem>();
-                var now = DateTime.UtcNow;
-                foreach (var (_, job) in _jobQueue)
-                {
-                    if (job.Time > now) 
-                        continue;
-                    expired.Add(job);
-                    Task.Run(job.Work);
-                }
-
-                foreach (var item in expired)
-                {
-                    _jobQueue.TryRemove(item.Id, out _);
-                }
+            using (var jobServer = new BackgroundJobServer(options))
+            {
+                await jobServer.WaitForShutdownAsync(_tokenSource.Token);
             }
         }
 
         public void Stop()
         {
-            _isCancellationRequested = true;
+            _tokenSource.Cancel();
             _jobThread.Join();
-        }
-
-        public void Enqueue(Func<Task> workItem, TimeSpan? delay = null)
-        {
-            var item = new WorkItem
-            {
-                Time = DateTime.UtcNow.Add(delay ?? TimeSpan.FromSeconds(10)),
-                Work = workItem
-            };
-
-            _jobQueue.TryAdd(item.Id, item);
-            Console.WriteLine($"Job {{{item.Id}}} will executed at ~{item.Time:s}.");
         }
     }
 }
