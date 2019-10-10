@@ -7,5 +7,7 @@
         public int  Timeout { get; set; }
 
         public int Database { get; set; }
+
+        public int JobStorageDatabase { get; set; }
     }
 }

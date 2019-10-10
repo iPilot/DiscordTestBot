@@ -7,9 +7,11 @@ using Discord;
 using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
-using PochinkiBot.Background;
+using Hangfire;
+using PochinkiBot.Background.Jobs;
 using PochinkiBot.Configuration;
 using PochinkiBot.Repositories.Interfaces;
+using Serilog;
 
 namespace PochinkiBot.Client
 {
@@ -19,34 +21,40 @@ namespace PochinkiBot.Client
         private readonly IRedisDatabaseProvider _redisDatabaseProvider;
         private readonly IRouletteStore _rouletteStore;
         private readonly IPidorStore _pidorStore;
-        private readonly BackgroundJobHandler _backgroundJobHandler;
+        private readonly IRemoveRoleJob _removeRoleJob;
+        private readonly IBackgroundJobClient _backgroundJobClient;
         private readonly DiscordSocketClient _client;
+        private readonly ILogger _logger = Log.Logger;
 
         private const string RoulettePattern = @"^рулетка!$";
         private const string StatsPattern = @"^статистика!$";
         private const string WhoPidorPattern = @"^кто пидор\?$";
         private const string AmIPidorPattern = @"^я пидор\?$";
         private const string GuildPidorTopPattern = @"^перепись пидоров$";
+        private const string DefaultPidorRole = "пидор дня";
 
         private bool _pidorSearchActive;
 
         private readonly Random _rng = new Random((int)DateTime.UtcNow.Ticks);
 
-        public DiscordClient(BotConfig config, IRedisDatabaseProvider redisDatabaseProvider, IRouletteStore rouletteStore, IPidorStore pidorStore, BackgroundJobHandler backgroundJobHandler)
+        public DiscordClient(BotConfig config,
+            IRedisDatabaseProvider redisDatabaseProvider,
+            IRouletteStore rouletteStore,
+            IPidorStore pidorStore,
+            IRemoveRoleJob removeRoleJob,
+            DiscordSocketClient client,
+            IBackgroundJobClient backgroundJobClient)
         {
             _config = config;
             _redisDatabaseProvider = redisDatabaseProvider;
             _rouletteStore = rouletteStore;
             _pidorStore = pidorStore;
-            _backgroundJobHandler = backgroundJobHandler;
-            _client = new DiscordSocketClient(new DiscordSocketConfig
-            {
-                AlwaysDownloadUsers = true,
-                MessageCacheSize = 250
-            });
+            _removeRoleJob = removeRoleJob;
+            _backgroundJobClient = backgroundJobClient;
+            _client = client;
         }
 
-        public async Task Run()
+        public async Task WaitForShutdown()
         {
             using (_client)
             {
@@ -61,9 +69,33 @@ namespace PochinkiBot.Client
 
         private void ConfigureEvents()
         {
-            _client.Log += Log;
+            _client.Log += msg =>
+            {
+                var logger = _logger.ForContext("Source", msg.Source);
+                switch (msg.Severity)
+                {
+                    case LogSeverity.Critical:
+                        logger.Fatal(msg.Exception, msg.Message);
+                        break;
+                    case LogSeverity.Error:
+                        logger.Error(msg.Exception, msg.Message);
+                        break;
+                    case LogSeverity.Warning:
+                        logger.Warning(msg.Exception, msg.Message);
+                        break;
+                    case LogSeverity.Info:
+                        logger.Information(msg.Exception, msg.Message);
+                        break;
+                    case LogSeverity.Verbose:
+                        logger.Verbose(msg.Exception, msg.Message);
+                        break;
+                    case LogSeverity.Debug:
+                        logger.Debug(msg.Exception, msg.Message);
+                        break;
+                }
+                return Task.CompletedTask;
+            };
             _client.Ready += () => _redisDatabaseProvider.Database.StringSetAsync("StartedAt", DateTime.UtcNow.ToString("O"));
-
             _client.MessageReceived += OnClientOnMessageReceived;
         }
 
@@ -82,18 +114,16 @@ namespace PochinkiBot.Client
 
                 if (Regex.IsMatch(content, RoulettePattern, RegexOptions.IgnoreCase))
                     await PlayRoulette(userMessage);
-
-                if (Regex.IsMatch(content, StatsPattern, RegexOptions.IgnoreCase))
+                else if (Regex.IsMatch(content, StatsPattern, RegexOptions.IgnoreCase))
                     await GetStats(userMessage);
-
-                if (Regex.IsMatch(content, WhoPidorPattern, RegexOptions.IgnoreCase))
+                else if (Regex.IsMatch(content, WhoPidorPattern, RegexOptions.IgnoreCase))
                     await WhoIsPidor(userMessage);
-
-                if (Regex.IsMatch(content, AmIPidorPattern, RegexOptions.IgnoreCase))
+                else if (Regex.IsMatch(content, AmIPidorPattern, RegexOptions.IgnoreCase))
                     await AmIPidor(userMessage);
-
-                if (Regex.IsMatch(content, GuildPidorTopPattern, RegexOptions.IgnoreCase))
+                else if (Regex.IsMatch(content, GuildPidorTopPattern, RegexOptions.IgnoreCase))
                     await GuildPidorTop(userMessage);
+                else
+                    await userMessage.DeleteAsync();
             });
 
             return Task.CompletedTask;
@@ -147,7 +177,7 @@ namespace PochinkiBot.Client
             {
                 var context = new SocketCommandContext(_client, userMessage);
                 var guildPidor = await _pidorStore.GetCurrentGuildPidor(context.Guild.Id);
-                var role = context.Guild.Roles.FirstOrDefault(r => r.Name.Equals("Пидор дня", StringComparison.OrdinalIgnoreCase));
+                var role = context.Guild.Roles.FirstOrDefault(r => r.Name.Equals(DefaultPidorRole, StringComparison.OrdinalIgnoreCase));
                 SocketGuildUser user = null;
                 if (guildPidor != null)
                 {
@@ -197,14 +227,9 @@ namespace PochinkiBot.Client
                 
                 if (role != null)
                 {
-                    var guildName = context.Guild.Name;
-                    Console.WriteLine($"Added role {role.Name} to user {user.Username} at server {guildName}.");
+                    _logger.Information("Added role \"{0}\" to user \"{1}\" at server \"{2}\".", role.Name, user.Username, context.Guild.Name);
                     await user.AddRoleAsync(role, new RequestOptions {AuditLogReason = "Пидор дня!"});
-                    _backgroundJobHandler.Enqueue(() =>
-                    {
-                        Console.WriteLine($"Removed role \"{role.Name}\" of user {user.Username} at server \"{guildName}\".");
-                        return user.RemoveRoleAsync(role, new RequestOptions {AuditLogReason = "Больше не пидор дня."});
-                    }, pidorOfTheDayExpires);
+                    _backgroundJobClient.Schedule(() => _removeRoleJob.RemoveRole(context.Guild.Id, user.Id, role.Id, "Больше не пидор дня!"), pidorOfTheDayExpires);
                 }
             }
             finally
@@ -270,12 +295,6 @@ namespace PochinkiBot.Client
             }
 
             return Task.WhenAll(messages.Select(m => m.DeleteAsync()));
-        }
-
-        private static Task Log(LogMessage message)
-        {
-            Console.WriteLine(message.ToString());
-            return Task.CompletedTask;
         }
     }
 }
