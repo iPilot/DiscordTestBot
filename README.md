@@ -22,3 +22,12 @@ https://cloud.docker.com/repository/docker/ipilot93/pochinki-bot
 ```
 ## Redis 
 Storage for bot data and hangfire jobs
+
+## Deploy script
+```sh
+docker stop pochinki-bot
+docker rm pochinki-bot
+docker rmi ipilot93/pochinki-bot:latest
+docker pull ipilot93/pochinki-bot:latest
+docker run -d -v /home/$user_name$/bot_confguration:/app/cfg --network bridge --name pochinki-bot ipilot93/pochinki-bot:latest --c cfg/config.json
+```
