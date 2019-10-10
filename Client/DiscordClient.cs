@@ -122,7 +122,8 @@ namespace PochinkiBot.Client
             var result = string.Join(Environment.NewLine, top.Where(t => context.Guild.GetUser(t.User) != null).Select(t =>
             {
                 var user = context.Guild.GetUser(t.User);
-                return $"**{user?.Nickname ?? user?.Username ?? t.User.ToString()}** замечен среди пидоров {t.Count} {GetTimesString(t.Count)}.";
+                var name = $"{user.Nickname ?? user.Username}{(user.Nickname == null ? "" : $" ({user.Username})")}";
+                return $"**{name}** замечен  среди пидоров {t.Count} {GetTimesString(t.Count)}.";
             }));
             await context.Channel.SendMessageAsync(result);
         }
