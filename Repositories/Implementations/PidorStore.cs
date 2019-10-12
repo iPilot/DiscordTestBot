@@ -33,8 +33,8 @@ namespace PochinkiBot.Repositories.Implementations
         public async Task<TimeSpan> SetGuildPidor(ulong guildId, ulong userId)
         {
             var now = DateTime.UtcNow;
-            var expiration = _configuration.PidorLengthSeconds > 0 
-                ? TimeSpan.FromSeconds(_configuration.PidorLengthSeconds) 
+            var expiration = _configuration.DailyPidor.PidorLengthSeconds > 0 
+                ? TimeSpan.FromSeconds(_configuration.DailyPidor.PidorLengthSeconds) 
                 : now.Date.AddHours(24 + 7) - now;
             await _redisDatabase.Database.StringSetAsync(GuildCurrentPidorKey(guildId), userId, expiration);
             await _redisDatabase.Database.HashIncrementAsync(GuildPidorStatsKey(guildId), userId);
@@ -57,14 +57,14 @@ namespace PochinkiBot.Repositories.Implementations
             return participants.Select(p => (ulong) p).ToHashSet();
         }
 
-        public async Task<List<(ulong User, int Count)>> GetGuildTop(ulong guildId)
+        public async Task<List<(ulong User, int Count)>> GetGuildTop(ulong guildId, int count)
         {
             var top = await _redisDatabase.Database.HashGetAllAsync(GuildPidorStatsKey(guildId));
             return top
                 .Select(e => (User: (ulong) e.Name, Count: (int) e.Value))
                 .OrderByDescending(p => p.Count)
                 .ThenBy(p => p.User)
-                .Take(10)
+                .Take(count)
                 .ToList();
         }
     }

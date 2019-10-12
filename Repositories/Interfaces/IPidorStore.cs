@@ -11,6 +11,6 @@ namespace PochinkiBot.Repositories.Interfaces
         Task<bool> AddGuildPidorParticipant(ulong guildId, ulong userId);
         Task RemoveGuildPidorParticipant(ulong guildId, ulong userId);
         Task<HashSet<ulong>> ListGuildPidorParticipants(ulong guildId);
-        Task<List<(ulong User, int Count)>> GetGuildTop(ulong guildId);
+        Task<List<(ulong User, int Count)>> GetGuildTop(ulong guildId, int count);
     }
 }

@@ -27,8 +27,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Client\Commands\" />
-  </ItemGroup>
-
 </Project>
