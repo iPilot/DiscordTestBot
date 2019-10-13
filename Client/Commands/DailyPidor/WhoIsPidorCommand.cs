@@ -23,7 +23,7 @@ namespace PochinkiBot.Client.Commands.DailyPidor
         private readonly IRemoveRoleJob _removeRoleJob;
         private bool _pidorSearchActive;
         private readonly ILogger _logger = Log.Logger;
-        
+        private readonly Random _rng = new Random((int)DateTime.UtcNow.Ticks);
 
         public WhoIsPidorCommand(DiscordSocketClient client, IPidorStore pidorStore, IBackgroundJobClient backgroundJobClient, IRemoveRoleJob removeRoleJob)
         {
@@ -68,10 +68,9 @@ namespace PochinkiBot.Client.Commands.DailyPidor
                     return;
                 }
 
-                var rng = new Random((int)DateTime.UtcNow.Ticks);
                 while (user == null)
                 {
-                    var nextPidor = rng.Next(0, guildParticipants.Count);
+                    var nextPidor = _rng.Next(0, guildParticipants.Count);
                     var pretended = guildParticipants.ElementAt(nextPidor);
                     user = context.Guild.Users.FirstOrDefault(u => u.Id == pretended);
                     if (user != null)

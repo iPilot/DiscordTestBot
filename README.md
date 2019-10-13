@@ -19,11 +19,11 @@ https://cloud.docker.com/repository/docker/ipilot93/pochinki-bot
     "JobStorageDatabase": 0
   },
   "DailyPidor": {
-    "PidorLengthSeconds": 86400
+    "PidorDurationSeconds": 86400
   },
   "RussianRoulette": {
-    "RouletteCooldownSeconds": 43200,
-    "RouletteWinnerRestorationSeconds": 28800
+    "RouletteCooldownSeconds": 28800,
+    "RouletteWinnerDurationSeconds": 43200
   }
 }
 ```
@@ -36,5 +36,5 @@ docker stop pochinki-bot
 docker rm pochinki-bot
 docker rmi ipilot93/pochinki-bot:latest
 docker pull ipilot93/pochinki-bot:latest
-docker run -d -v /home/$user_name$/bot_confguration:/app/cfg --network bridge --name pochinki-bot ipilot93/pochinki-bot:latest --c cfg/config.json
+docker run -d -v /home/$user_name$/bot_confguration:/app/cfg --network $network$ --name pochinki-bot ipilot93/pochinki-bot:latest --c cfg/config.json
 ```

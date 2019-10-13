@@ -33,8 +33,8 @@ namespace PochinkiBot.Repositories.Implementations
         public async Task<TimeSpan> SetGuildPidor(ulong guildId, ulong userId)
         {
             var now = DateTime.UtcNow;
-            var expiration = _configuration.DailyPidor.PidorLengthSeconds > 0 
-                ? TimeSpan.FromSeconds(_configuration.DailyPidor.PidorLengthSeconds) 
+            var expiration = _configuration.DailyPidor.PidorDurationSeconds > 0 
+                ? TimeSpan.FromSeconds(_configuration.DailyPidor.PidorDurationSeconds) 
                 : now.Date.AddHours(24 + 7) - now;
             await _redisDatabase.Database.StringSetAsync(GuildCurrentPidorKey(guildId), userId, expiration);
             await _redisDatabase.Database.HashIncrementAsync(GuildPidorStatsKey(guildId), userId);
