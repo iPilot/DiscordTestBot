@@ -22,7 +22,8 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
         private readonly IBackgroundJobClient _backgroundJobClient;
         private readonly BotConfig _config;
         private readonly IRemoveRoleJob _removeRoleJob;
-        
+        private readonly Random _rng = new Random((int)DateTime.UtcNow.Ticks);
+
         public PlayRouletteCommand(DiscordSocketClient client,
             IRouletteStore rouletteStore,
             IBackgroundJobClient backgroundJobClient,
@@ -53,16 +54,16 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
                 return;
             }
 
-            var value = new Random((int)DateTime.UtcNow.Ticks).Next(0, 6);
+            var value = _rng.Next(0, 600);
             string result;
-            if (value == 0)
+            if (value % 6 == 0)
             {
                 result = $"**ВЫСТРЕЛ КОЛЬТА В ТУПОЕ ЕБЛО <@{userMessage.Author.Id}> РАЗНОСИТ МОЗГ ПО ДРОБЯМ!**";
                 await _rouletteStore.IncrementRouletteWins(context.Guild.Id, userMessage.Author.Id);
                 if (userMessage.Author is SocketGuildUser user)
                 {
                     await user.AddRoleAsync(role, new RequestOptions {AuditLogReason = "Застрелился!"});
-                    var expiry = TimeSpan.FromSeconds(_config.RussianRoulette.RouletteCooldownSeconds);
+                    var expiry = TimeSpan.FromSeconds(_config.RussianRoulette.RouletteWinnerDurationSeconds);
                     _backgroundJobClient.Schedule(() => _removeRoleJob.RemoveRole(context.Guild.Id, user.Id, role.Id, "Жив, цел, орёл!"), expiry);
                 }
             }

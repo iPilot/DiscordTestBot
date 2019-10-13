@@ -2,6 +2,6 @@
 {
     public class DailyPidorConfiguration
     {
-        public int PidorLengthSeconds { get; set; }
+        public int PidorDurationSeconds { get; set; }
     }
 }
