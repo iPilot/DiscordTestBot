@@ -8,6 +8,7 @@ using Hangfire.Redis;
 using Microsoft.Extensions.DependencyInjection;
 using PochinkiBot.Background;
 using PochinkiBot.Client;
+using PochinkiBot.Client.Commands;
 using PochinkiBot.Configuration;
 using PochinkiBot.Repositories.Implementations;
 using PochinkiBot.Repositories.Interfaces;
@@ -58,6 +59,7 @@ namespace PochinkiBot
             services.AddSingleton<IRedisDatabaseProvider, RedisDatabaseProvider>();
             services.AddSingleton<DiscordClient>();
             services.AddSingleton<IBackgroundJobClient, BackgroundJobClient>();
+            services.AddSingleton<ICommandCollection, CommandCollection>();
             
             services.Scan(s => s.FromApplicationDependencies()
                 .AddClasses(c => c.AssignableTo<IRedisStore>())
@@ -66,6 +68,11 @@ namespace PochinkiBot
 
             services.Scan(s => s.FromApplicationDependencies()
                 .AddClasses(c => c.AssignableTo<IBackgroundJob>())
+                .AsSelfWithInterfaces()
+                .WithSingletonLifetime());
+
+            services.Scan(s => s.FromApplicationDependencies()
+                .AddClasses(c => c.AssignableTo<IBotCommand>().WithAttribute<CommandAttribute>())
                 .AsSelfWithInterfaces()
                 .WithSingletonLifetime());
 

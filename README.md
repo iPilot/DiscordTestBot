@@ -15,8 +15,15 @@ https://cloud.docker.com/repository/docker/ipilot93/pochinki-bot
   "Redis": {
     "Host": "0.0.0.0:6379",
     "Timeout": 10000,
-    "Database": 2,
-    "JobStorageDatabase": 3
+    "Database": 1,
+    "JobStorageDatabase": 0
+  },
+  "DailyPidor": {
+    "PidorLengthSeconds": 86400
+  },
+  "RussianRoulette": {
+    "RouletteCooldownSeconds": 43200,
+    "RouletteWinnerRestorationSeconds": 28800
   }
 }
 ```

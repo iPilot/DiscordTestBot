@@ -8,8 +8,9 @@ namespace PochinkiBot.Configuration
 
         public string Token { get; }
         public RedisConfiguration RedisConfiguration { get; }
-        public int PidorLengthSeconds { get; }
-
+        public DailyPidorConfiguration DailyPidor { get; }
+        public RussianRouletteConfiguration RussianRoulette { get; }
+        
         public BotConfig() : this("config.json")
         {
         }
@@ -22,9 +23,10 @@ namespace PochinkiBot.Configuration
 
             Token = _configuration["Token"];
             RedisConfiguration = Get<RedisConfiguration>("Redis");
-            PidorLengthSeconds = Get<int>(nameof(PidorLengthSeconds));
+            DailyPidor = Get<DailyPidorConfiguration>(nameof(DailyPidor));
+            RussianRoulette = Get<RussianRouletteConfiguration>(nameof(RussianRoulette));
         }
-
+        
         public T Get<T>(string key) => _configuration.GetSection(key).Get<T>();
     }
 }
