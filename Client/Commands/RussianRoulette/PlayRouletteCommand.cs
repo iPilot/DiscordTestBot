@@ -63,7 +63,7 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
                 if (userMessage.Author is SocketGuildUser user)
                 {
                     await user.AddRoleAsync(role, new RequestOptions {AuditLogReason = "Застрелился!"});
-                    var expiry = TimeSpan.FromSeconds(_config.RussianRoulette.RouletteWinnerDurationSeconds);
+                    var expiry = TimeSpan.FromSeconds(_config.RussianRoulette.WinnerDurationSeconds);
                     _backgroundJobClient.Schedule(() => _removeRoleJob.RemoveRole(context.Guild.Id, user.Id, role.Id, "Жив, цел, орёл!"), expiry);
                 }
             }
