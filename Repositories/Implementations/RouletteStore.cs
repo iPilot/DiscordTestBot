@@ -38,7 +38,7 @@ namespace PochinkiBot.Repositories.Implementations
 
         public Task SetUserRouletteCooldown(ulong guildId, ulong userId)
         {
-            var expiry = TimeSpan.FromSeconds(_config.RussianRoulette.RouletteCooldownSeconds);
+            var expiry = TimeSpan.FromSeconds(_config.RussianRoulette.CooldownSeconds);
             return _redisDatabaseProvider.Database.StringSetAsync(GuildCooldownKey(guildId, userId), "1", expiry);
         }
 

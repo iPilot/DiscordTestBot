@@ -2,7 +2,7 @@
 {
     public class RussianRouletteConfiguration
     {
-        public int RouletteCooldownSeconds { get; set; }
-        public int RouletteWinnerDurationSeconds { get; set; }
+        public int CooldownSeconds { get; set; }
+        public int WinnerDurationSeconds { get; set; }
     }
 }
