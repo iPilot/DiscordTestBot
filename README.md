@@ -19,11 +19,11 @@ https://cloud.docker.com/repository/docker/ipilot93/pochinki-bot
     "JobStorageDatabase": 0
   },
   "DailyPidor": {
-    "PidorDurationSeconds": 86400
+    "DurationSeconds": 86400
   },
   "RussianRoulette": {
-    "RouletteCooldownSeconds": 28800,
-    "RouletteWinnerDurationSeconds": 43200
+    "CooldownSeconds": 28800,
+    "WinnerDurationSeconds": 43200
   }
 }
 ```
