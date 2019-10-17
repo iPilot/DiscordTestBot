@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using PochinkiBot.Background;
 using PochinkiBot.Client;
 using PochinkiBot.Client.Commands;
+using PochinkiBot.Client.Commands.DailyPidor.Scripts;
 using PochinkiBot.Configuration;
 using PochinkiBot.Repositories.Implementations;
 using PochinkiBot.Repositories.Interfaces;
@@ -76,8 +77,13 @@ namespace PochinkiBot
                 .AsSelfWithInterfaces()
                 .WithSingletonLifetime());
 
+            services.Scan(s => s.FromApplicationDependencies()
+                .AddClasses(c => c.AssignableTo<IDailyPidorScript>())
+                .AsSelfWithInterfaces()
+                .WithSingletonLifetime());
+
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Information()
+                .MinimumLevel.Debug()
                 .WriteTo.Console()
                 .CreateLogger();
 

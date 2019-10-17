@@ -58,7 +58,7 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
             string result;
             if (value % 6 == 0)
             {
-                result = $"**ВЫСТРЕЛ КОЛЬТА В ТУПОЕ ЕБЛО <@{userMessage.Author.Id}> РАЗНОСИТ МОЗГ ПО ДРОБЯМ!**";
+                result = $"**ВЫСТРЕЛ КОЛЬТА В ТУПОЕ ЕБЛО {userMessage.Author.Mention} РАЗНОСИТ МОЗГ ПО ДРОБЯМ!**";
                 await _rouletteStore.IncrementRouletteWins(context.Guild.Id, userMessage.Author.Id);
                 if (userMessage.Author is SocketGuildUser user)
                 {

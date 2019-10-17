@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -6,6 +7,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Hangfire;
 using PochinkiBot.Background.Jobs;
+using PochinkiBot.Client.Commands.DailyPidor.Scripts;
 using PochinkiBot.Misc;
 using PochinkiBot.Repositories.Interfaces;
 using Serilog;
@@ -20,16 +22,22 @@ namespace PochinkiBot.Client.Commands.DailyPidor
         private readonly DiscordSocketClient _client;
         private readonly IPidorStore _pidorStore;
         private readonly IBackgroundJobClient _backgroundJobClient;
+        private readonly IDailyPidorScript[] _scripts;
         private readonly IRemoveRoleJob _removeRoleJob;
         private bool _pidorSearchActive;
         private readonly ILogger _logger = Log.Logger;
         private readonly Random _rng = new Random((int)DateTime.UtcNow.Ticks);
 
-        public WhoIsPidorCommand(DiscordSocketClient client, IPidorStore pidorStore, IBackgroundJobClient backgroundJobClient, IRemoveRoleJob removeRoleJob)
+        public WhoIsPidorCommand(DiscordSocketClient client, 
+            IPidorStore pidorStore, 
+            IBackgroundJobClient backgroundJobClient,
+            IEnumerable<IDailyPidorScript> scripts,
+            IRemoveRoleJob removeRoleJob)
         {
             _client = client;
             _pidorStore = pidorStore;
             _backgroundJobClient = backgroundJobClient;
+            _scripts = scripts.ToArray();
             _removeRoleJob = removeRoleJob;
         }
 
@@ -80,16 +88,13 @@ namespace PochinkiBot.Client.Commands.DailyPidor
                 }
 
                 var pidorOfTheDayExpires = await _pidorStore.SetGuildPidor(context.Guild.Id, user.Id);
-                
-                await userMessage.Channel.SendMessageAsync("Начинаю поиск пидора...");
-                await Task.Delay(1500);
-                await userMessage.Channel.SendMessageAsync("Анализирую коренных жителей Починок...");
-                await Task.Delay(1500);
-                await userMessage.Channel.SendMessageAsync("Анализирую понаехов...");
-                await Task.Delay(1500);
-                await userMessage.Channel.SendMessageAsync("Нашел!");
-                await Task.Delay(1500);
-                await userMessage.Channel.SendMessageAsync($"И пидор сегодня - {user.Mention}!");
+
+                var script = _scripts[_rng.Next(0, _scripts.Length)];
+                foreach (var phrase in script.GetPhrases(user))
+                {
+                    await userMessage.Channel.SendMessageAsync(phrase);
+                    await Task.Delay(1500);
+                }
                 
                 if (role != null)
                 {
