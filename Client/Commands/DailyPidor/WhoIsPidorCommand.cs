@@ -55,7 +55,7 @@ namespace PochinkiBot.Client.Commands.DailyPidor
             {
                 var context = new SocketCommandContext(_client, userMessage);
                 var guildPidor = await _pidorStore.GetCurrentGuildPidor(context.Guild.Id);
-                var roleName = _config.DailyPidor.PidorRole ?? DefaultPidorRole;
+                var roleName = _config.DailyPidor.RoleName ?? DefaultPidorRole;
                 var role = context.Guild.Roles.FirstOrDefault(r => r.Name.Equals(roleName, StringComparison.OrdinalIgnoreCase));
                 SocketGuildUser user = null;
                 if (guildPidor != null)

@@ -58,7 +58,7 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
         public async Task Execute(SocketUserMessage userMessage, int argsPos)
         {
             var context = new SocketCommandContext(_client, userMessage);
-            var roleName = _config.RussianRoulette.WinnerRole ?? DefaultRouletteRole;
+            var roleName = _config.RussianRoulette.WinnerRoleName ?? DefaultRouletteRole;
             var role = context.Guild.Roles.FirstOrDefault(r => r.Name.Equals(roleName, StringComparison.OrdinalIgnoreCase));
             if (role == null || role.Permissions.SendMessages)
             {

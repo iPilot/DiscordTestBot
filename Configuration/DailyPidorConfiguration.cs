@@ -3,6 +3,6 @@
     public class DailyPidorConfiguration
     {
         public int DurationSeconds { get; set; }
-        public string PidorRole { get; set; }
+        public string RoleName { get; set; }
     }
 }
