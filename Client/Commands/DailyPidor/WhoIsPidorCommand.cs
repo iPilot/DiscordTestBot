@@ -8,6 +8,7 @@ using Discord.WebSocket;
 using Hangfire;
 using PochinkiBot.Background.Jobs;
 using PochinkiBot.Client.Commands.DailyPidor.Scripts;
+using PochinkiBot.Configuration;
 using PochinkiBot.Misc;
 using PochinkiBot.Repositories.Interfaces;
 using Serilog;
@@ -22,6 +23,7 @@ namespace PochinkiBot.Client.Commands.DailyPidor
         private readonly DiscordSocketClient _client;
         private readonly IPidorStore _pidorStore;
         private readonly IBackgroundJobClient _backgroundJobClient;
+        private readonly BotConfig _config;
         private readonly IDailyPidorScript[] _scripts;
         private readonly IRemoveRoleJob _removeRoleJob;
         private bool _pidorSearchActive;
@@ -32,11 +34,13 @@ namespace PochinkiBot.Client.Commands.DailyPidor
             IPidorStore pidorStore, 
             IBackgroundJobClient backgroundJobClient,
             IEnumerable<IDailyPidorScript> scripts,
+            BotConfig config,
             IRemoveRoleJob removeRoleJob)
         {
             _client = client;
             _pidorStore = pidorStore;
             _backgroundJobClient = backgroundJobClient;
+            _config = config;
             _scripts = scripts.ToArray();
             _removeRoleJob = removeRoleJob;
         }
@@ -51,7 +55,8 @@ namespace PochinkiBot.Client.Commands.DailyPidor
             {
                 var context = new SocketCommandContext(_client, userMessage);
                 var guildPidor = await _pidorStore.GetCurrentGuildPidor(context.Guild.Id);
-                var role = context.Guild.Roles.FirstOrDefault(r => r.Name.Equals(DefaultPidorRole, StringComparison.OrdinalIgnoreCase));
+                var roleName = _config.DailyPidor.PidorRole ?? DefaultPidorRole;
+                var role = context.Guild.Roles.FirstOrDefault(r => r.Name.Equals(roleName, StringComparison.OrdinalIgnoreCase));
                 SocketGuildUser user = null;
                 if (guildPidor != null)
                 {
