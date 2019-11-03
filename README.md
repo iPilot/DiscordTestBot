@@ -29,7 +29,7 @@ https://cloud.docker.com/repository/docker/ipilot93/pochinki-bot
   }
 }
 ```
-## Server
+## Discord server
 Add roles with the same names as in config file (case insensitive)
 
 ## Redis 
