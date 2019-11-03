@@ -19,8 +19,8 @@ https://cloud.docker.com/repository/docker/ipilot93/pochinki-bot
     "JobStorageDatabase": 0
   },
   "DailyPidor": {
-    "PidorRole": "пидор дня",
-    "DurationSeconds": 86400
+    "RoleName": "пидор дня",
+    "DurationSeconds": 0
   },
   "RussianRoulette": {
     "WinnerRoleName": "ковбой",
@@ -30,7 +30,8 @@ https://cloud.docker.com/repository/docker/ipilot93/pochinki-bot
 }
 ```
 ## Discord server
-Add roles with the same names as in config file (case insensitive)
+Add roles with the same names as in config file (case insensitive).
+Left `DailyPidor.DurationSeconds` equals 0 to reset command @ 07:00 UTC every day.
 
 ## Redis 
 Storage for bot data and hangfire jobs
