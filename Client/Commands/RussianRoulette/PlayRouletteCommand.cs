@@ -9,6 +9,7 @@ using PochinkiBot.Background.Jobs;
 using PochinkiBot.Configuration;
 using PochinkiBot.Misc;
 using PochinkiBot.Repositories.Interfaces;
+using Serilog;
 
 namespace PochinkiBot.Client.Commands.RussianRoulette
 {
@@ -39,6 +40,7 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
         private readonly BotConfig _config;
         private readonly IRemoveRoleJob _removeRoleJob;
         private readonly Random _rng = new Random((int)DateTime.UtcNow.Ticks);
+        private static readonly ILogger Logger = Log.ForContext<PlayRouletteCommand>();
 
         public PlayRouletteCommand(DiscordSocketClient client,
             IRouletteStore rouletteStore,
@@ -56,7 +58,8 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
         public async Task Execute(SocketUserMessage userMessage, int argsPos)
         {
             var context = new SocketCommandContext(_client, userMessage);
-            var role = context.Guild.Roles.FirstOrDefault(r => r.Name.Equals(DefaultRouletteRole, StringComparison.OrdinalIgnoreCase));
+            var roleName = _config.RussianRoulette.WinnerRole ?? DefaultRouletteRole;
+            var role = context.Guild.Roles.FirstOrDefault(r => r.Name.Equals(roleName, StringComparison.OrdinalIgnoreCase));
             if (role == null || role.Permissions.SendMessages)
             {
                 await userMessage.DeleteAsync();
@@ -80,6 +83,7 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
                 await _rouletteStore.IncrementRouletteWins(context.Guild.Id, userMessage.Author.Id);
                 if (userMessage.Author is SocketGuildUser user)
                 {
+                    Logger.Information("Added role \"{0}\" to user \"{1}\" at server \"{2}\".", role.Name, user.Username, context.Guild.Name);
                     await user.AddRoleAsync(role, new RequestOptions {AuditLogReason = "Застрелился!"});
                     var expiry = TimeSpan.FromSeconds(_config.RussianRoulette.WinnerDurationSeconds);
                     _backgroundJobClient.Schedule(() => _removeRoleJob.RemoveRole(context.Guild.Id, user.Id, role.Id, "Жив, цел, орёл!"), expiry);

@@ -4,5 +4,6 @@
     {
         public int CooldownSeconds { get; set; }
         public int WinnerDurationSeconds { get; set; }
+        public string WinnerRole { get; set; }
     }
 }

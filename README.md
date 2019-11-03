@@ -19,14 +19,19 @@ https://cloud.docker.com/repository/docker/ipilot93/pochinki-bot
     "JobStorageDatabase": 0
   },
   "DailyPidor": {
+    "PidorRole": "пидор дня",
     "DurationSeconds": 86400
   },
   "RussianRoulette": {
+    "WinnerRoleName": "ковбой",
     "CooldownSeconds": 28800,
     "WinnerDurationSeconds": 43200
   }
 }
 ```
+## Server
+Add roles with the same names as in config file (case insensitive)
+
 ## Redis 
 Storage for bot data and hangfire jobs
 
