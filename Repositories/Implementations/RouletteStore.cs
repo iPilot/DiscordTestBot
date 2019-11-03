@@ -31,9 +31,10 @@ namespace PochinkiBot.Repositories.Implementations
             return _redisDatabaseProvider.Database.HashIncrementAsync(GuildWinsStatsKey(guildId), userId);
         }
 
-        public Task<bool> HasUserRouletteCooldown(ulong guildId, ulong userId)
+        public async Task<TimeSpan> UserRouletteCooldown(ulong guildId, ulong userId)
         {
-            return _redisDatabaseProvider.Database.KeyExistsAsync(GuildCooldownKey(guildId, userId));
+            var time = await _redisDatabaseProvider.Database.KeyIdleTimeAsync(GuildCooldownKey(guildId, userId));
+            return time ?? TimeSpan.Zero;
         }
 
         public Task SetUserRouletteCooldown(ulong guildId, ulong userId)

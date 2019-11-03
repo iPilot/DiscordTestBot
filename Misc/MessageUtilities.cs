@@ -23,5 +23,13 @@ namespace PochinkiBot.Misc
                 return "раза";
             return "раз";
         }
+
+        public static string FormatForMessage(this TimeSpan time)
+        {
+            if (time.Days > 0 || time.Hours > 0)
+                return $" **(еще {time.TotalHours:F1} часов)**";
+
+            return $" **(еще {time.TotalMinutes:F1} минут)**";
+        }
     }
 }

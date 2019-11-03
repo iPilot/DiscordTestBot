@@ -3,14 +3,14 @@ using Discord.WebSocket;
 
 namespace PochinkiBot.Client.Commands.DailyPidor.Scripts
 {
-    public class DefaultDailyPidorScript : IDailyPidorScript
+    public class Default2DailyPidorScript : IDailyPidorScript
     {
         private static readonly string[] ConstantPhrases = 
         {
             "Начинаю поиск пидора...",
             "Анализирую коренных жителей Починок...",
             "Анализирую понаехов...",
-            "Нашел!"
+            "Пидор обнаружен!"
         };
 
         public IEnumerable<string> GetPhrases(SocketUser target)
@@ -20,7 +20,7 @@ namespace PochinkiBot.Client.Commands.DailyPidor.Scripts
                 yield return phrase;
             }
 
-            yield return $"И пидор сегодня - {target.Mention}!";
+            yield return $"И им оказался {target.Mention}!";
         }
     }
 }
