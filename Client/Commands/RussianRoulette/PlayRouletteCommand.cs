@@ -27,7 +27,7 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
         private static readonly string[] CooldownPhrases =
         {
             "*Не так часто, ковбой!*",
-            "*Не в сейчас.*",
+            "*Не сейчас.*",
             "*Не торопись помереть!*",
             "*Ты что не видишь? У меня обед!*",
             "*Извини, патроны закончились.*"
@@ -83,6 +83,7 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
                     await user.AddRoleAsync(role, new RequestOptions {AuditLogReason = "Застрелился!"});
                     var expiry = TimeSpan.FromSeconds(_config.RussianRoulette.WinnerDurationSeconds);
                     _backgroundJobClient.Schedule(() => _removeRoleJob.RemoveRole(context.Guild.Id, user.Id, role.Id, "Жив, цел, орёл!"), expiry);
+                    result = string.Format(result, user.Mention);
                 }
             }
             else
