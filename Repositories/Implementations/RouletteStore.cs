@@ -33,7 +33,7 @@ namespace PochinkiBot.Repositories.Implementations
 
         public async Task<TimeSpan> UserRouletteCooldown(ulong guildId, ulong userId)
         {
-            var time = await _redisDatabaseProvider.Database.KeyIdleTimeAsync(GuildCooldownKey(guildId, userId));
+            var time = await _redisDatabaseProvider.Database.KeyTimeToLiveAsync(GuildCooldownKey(guildId, userId));
             return time ?? TimeSpan.Zero;
         }
 
