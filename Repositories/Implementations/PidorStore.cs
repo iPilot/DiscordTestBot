@@ -51,10 +51,10 @@ namespace PochinkiBot.Repositories.Implementations
             return _redisDatabase.Database.HashDeleteAsync(GuildPidorParticipants(guildId), userId);
         }
 
-        public async Task<HashSet<ulong>> ListGuildPidorParticipants(ulong guildId)
+        public async Task<List<ulong>> ListGuildPidorParticipants(ulong guildId)
         {
             var participants = await _redisDatabase.Database.HashKeysAsync(GuildPidorParticipants(guildId));
-            return participants.Select(p => (ulong) p).ToHashSet();
+            return participants.Select(p => (ulong) p).OrderBy(d => d).ToList();
         }
 
         public async Task<List<(ulong User, int Count)>> GetGuildTop(ulong guildId, int count)
