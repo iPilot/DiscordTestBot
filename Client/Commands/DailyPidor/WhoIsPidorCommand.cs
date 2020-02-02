@@ -84,7 +84,7 @@ namespace PochinkiBot.Client.Commands.DailyPidor
                 while (user == null)
                 {
                     var nextPidor = _rng.Next(0, guildParticipants.Count);
-                    var pretended = guildParticipants.ElementAt(nextPidor);
+                    var pretended = guildParticipants[nextPidor];
                     user = context.Guild.Users.FirstOrDefault(u => u.Id == pretended);
                     if (user != null)
                         continue;

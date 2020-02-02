@@ -10,7 +10,7 @@ namespace PochinkiBot.Repositories.Interfaces
         Task<TimeSpan> SetGuildPidor(ulong guildId, ulong userId);
         Task<bool> AddGuildPidorParticipant(ulong guildId, ulong userId);
         Task RemoveGuildPidorParticipant(ulong guildId, ulong userId);
-        Task<HashSet<ulong>> ListGuildPidorParticipants(ulong guildId);
+        Task<List<ulong>> ListGuildPidorParticipants(ulong guildId);
         Task<List<(ulong User, int Count)>> GetGuildTop(ulong guildId, int count);
     }
 }
