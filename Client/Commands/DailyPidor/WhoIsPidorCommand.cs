@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -57,6 +58,14 @@ namespace PochinkiBot.Client.Commands.DailyPidor
                 var guildPidor = await _pidorStore.GetCurrentGuildPidor(context.Guild.Id);
                 var roleName = _config.DailyPidor.RoleName ?? DefaultPidorRole;
                 var role = context.Guild.Roles.FirstOrDefault(r => r.Name.Equals(roleName, StringComparison.OrdinalIgnoreCase));
+
+                var now = DateTime.Now;
+                if (now.Day == 1 && now.Month == 4)
+                {
+                    await userMessage.Channel.SendMessageAsync($"А сегодня пидор ты, {userMessage.Author.Mention}!");
+                    return;
+                }
+
                 SocketGuildUser user = null;
                 if (guildPidor != null)
                 {
@@ -81,7 +90,7 @@ namespace PochinkiBot.Client.Commands.DailyPidor
                     return;
                 }
 
-                while (user == null)
+                do
                 {
                     var nextPidor = _rng.Next(0, guildParticipants.Count);
                     var pretended = guildParticipants[nextPidor];
@@ -90,7 +99,7 @@ namespace PochinkiBot.Client.Commands.DailyPidor
                         continue;
                     guildParticipants.Remove(pretended);
                     await _pidorStore.RemoveGuildPidorParticipant(context.Guild.Id, pretended);
-                }
+                } while (user == null);
 
                 var pidorOfTheDayExpires = await _pidorStore.SetGuildPidor(context.Guild.Id, user.Id);
 
