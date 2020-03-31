@@ -75,7 +75,8 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
                 return;
             }
 
-            var value = _rng.Next(0, 600);
+            var now = DateTime.Now;
+            var value = now.Day == 1 && now.Month == 4 ? 6 : _rng.Next(0, 600);
             string result;
             if (value % 6 == 0)
             {
