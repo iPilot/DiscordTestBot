@@ -76,11 +76,12 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
             }
 
             var now = DateTime.Now;
-            var value = now.Day == 1 && now.Month == 4 ? 6 : _rng.Next(0, 600);
+            var isAprilFools = now.Day == 1 && now.Month == 4;
+            var value = isAprilFools ? 6 : _rng.Next(0, 600);
             string result;
             if (value % 6 == 0)
             {
-                result = WinPhrases[_rng.Next(WinPhrases.Length)];
+                result = isAprilFools ? "**С ПЕРВЫМ АПРЕЛЯ, МУДИЛА!**" : WinPhrases[_rng.Next(WinPhrases.Length)];
                 await _rouletteStore.IncrementRouletteWins(context.Guild.Id, userMessage.Author.Id);
                 if (userMessage.Author is SocketGuildUser user)
                 {
