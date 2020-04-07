@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -66,7 +65,7 @@ namespace PochinkiBot.Client.Commands.DailyPidor
                     return;
                 }
 
-                SocketGuildUser user = null;
+                SocketGuildUser user;
                 if (guildPidor != null)
                 {
                     user = context.Guild.GetUser(guildPidor.Value);

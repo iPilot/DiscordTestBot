@@ -24,24 +24,40 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
             var context = userMessage.GetMessageContext(_client);
             var stat = await _rouletteStore.GetGuildStats(context.Guild.Id, 10);
 
+            var countArg = argsPos >= userMessage.Content.Length ? "" : userMessage.Content.Substring(argsPos + 1);
+            if (string.IsNullOrWhiteSpace(countArg))
+                countArg = "5";
+
             string message;
+            if (!int.TryParse(countArg, out var count))
+            {
+                await userMessage.DeleteAsync();
+                return;
+            }
+
+            count = Math.Max(5, count);
             if (stat.Count == 0)
-                message = $"Пусто... сыграйте \"@bot рулетка!\"";
+                message = $"Пусто... сыграйте \"{_client.CurrentUser.Mention} рулетка!\"";
             else
             {
                 var z = stat
                     .Select(s => (s.Value, context.Guild.GetUser(s.Key)))
                     .Where(s => s.Item2 != null)
+                    .OrderByDescending(s => s.Value.Wins+s.Value.Loses)
+                    .ThenByDescending(s => s.Value.Wins)
+                    .ThenBy(s => s.Item2.Id)
+                    .Take(count)
                     .Select(s =>
                     {
                         var ((wins, loses), user) = s;
-                        return $"**{user.GetUserDisplayName()}** застрелился {wins} {wins.ToTimesString()}! ({100.0 * wins / (wins + loses):f1}%)";
+                        var c = wins + loses;
+                        return $"**{user.GetUserDisplayName()}** застрелился {wins} {wins.ToTimesString()}! ({100.0 * wins / c:f1}% от {c})";
                     });
                 message = string.Join(Environment.NewLine, z);
             }
 
             var reply = await userMessage.Channel.SendMessageAsync(message);
-            await MessageUtilities.DeleteMessagesAsync(10, userMessage, reply);
+            await MessageUtilities.DeleteMessagesAsync(15, userMessage, reply);
         }
     }
 }

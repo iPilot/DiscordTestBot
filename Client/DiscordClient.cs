@@ -76,24 +76,23 @@ namespace PochinkiBot.Client
 
         private Task OnClientOnMessageReceived(SocketMessage msg)
         {
-            Task.Run(async () =>
+            Task.Run(() =>
             {
                 if (!(msg is SocketUserMessage userMessage))
-                    return;
+                    return Task.CompletedTask;
 
                 if (userMessage.Channel is IDMChannel)
-                    return;
+                    return Task.CompletedTask;
 
                 var pos = 0;
                 if (!userMessage.HasMentionPrefix(_client.CurrentUser, ref pos))
-                    return;
+                    return Task.CompletedTask;
 
-                var command = _commandCollection.GetCommand(msg.Content, pos);
+                var command = _commandCollection.GetCommand(msg.Content, ref pos);
 
-                if (command != null)
-                    await command.Execute(userMessage, pos);
-                else
-                    await userMessage.DeleteAsync();
+                return command != null 
+                    ? command.Execute(userMessage, pos) 
+                    : userMessage.DeleteAsync();
             });
 
             return Task.CompletedTask;

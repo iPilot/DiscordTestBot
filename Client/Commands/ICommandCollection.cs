@@ -2,6 +2,6 @@
 {
     public interface ICommandCollection
     {
-        IBotCommand GetCommand(string messageText, int startPosition);
+        IBotCommand GetCommand(string messageText, ref int position);
     }
 }
