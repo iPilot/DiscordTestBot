@@ -35,14 +35,13 @@ namespace PochinkiBot.Client.Commands
             }
         }
 
-        public IBotCommand GetCommand(string messageText, int startPosition)
+        public IBotCommand GetCommand(string messageText, ref int position)
         {
-            var i = startPosition;
             var currentNode = _collectionRoot;
-            while (i < messageText.Length && currentNode.ChildNodes.TryGetValue(char.ToLower(messageText[i]), out var child))
+            while (position < messageText.Length && currentNode.ChildNodes.TryGetValue(char.ToLower(messageText[position]), out var child))
             {
                 currentNode = child;
-                i++;
+                position++;
             }
 
             return currentNode?.Command;
