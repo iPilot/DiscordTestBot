@@ -11,6 +11,7 @@ using PochinkiBot.Client;
 using PochinkiBot.Client.Commands;
 using PochinkiBot.Client.Commands.DailyPidor.Scripts;
 using PochinkiBot.Configuration;
+using PochinkiBot.Misc;
 using PochinkiBot.Repositories.Implementations;
 using PochinkiBot.Repositories.Interfaces;
 using Serilog;
@@ -81,6 +82,8 @@ namespace PochinkiBot
                 .AddClasses(c => c.AssignableTo<IDailyPidorScript>())
                 .AsSelfWithInterfaces()
                 .WithSingletonLifetime());
+
+            services.AddSingleton<IBotDeveloperProvider, BotDeveloperProvider>();
 
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()

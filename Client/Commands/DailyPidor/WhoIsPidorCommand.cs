@@ -28,7 +28,6 @@ namespace PochinkiBot.Client.Commands.DailyPidor
         private readonly IRemoveRoleJob _removeRoleJob;
         private bool _pidorSearchActive;
         private readonly ILogger _logger = Log.Logger;
-        private readonly Random _rng = new Random((int)DateTime.UtcNow.Ticks);
 
         public WhoIsPidorCommand(DiscordSocketClient client, 
             IPidorStore pidorStore, 
@@ -57,6 +56,7 @@ namespace PochinkiBot.Client.Commands.DailyPidor
                 var guildPidor = await _pidorStore.GetCurrentGuildPidor(context.Guild.Id);
                 var roleName = _config.DailyPidor.RoleName ?? DefaultPidorRole;
                 var role = context.Guild.Roles.FirstOrDefault(r => r.Name.Equals(roleName, StringComparison.OrdinalIgnoreCase));
+                var rng = new Random((int)DateTime.UtcNow.Ticks);
 
                 var now = DateTime.Now;
                 if (now.Day == 1 && now.Month == 4)
@@ -91,7 +91,7 @@ namespace PochinkiBot.Client.Commands.DailyPidor
 
                 do
                 {
-                    var nextPidor = _rng.Next(0, guildParticipants.Count);
+                    var nextPidor = rng.Next(0, guildParticipants.Count);
                     var pretended = guildParticipants[nextPidor];
                     user = context.Guild.Users.FirstOrDefault(u => u.Id == pretended);
                     if (user != null)
@@ -102,7 +102,7 @@ namespace PochinkiBot.Client.Commands.DailyPidor
 
                 var pidorOfTheDayExpires = await _pidorStore.SetGuildPidor(context.Guild.Id, user.Id);
 
-                var script = _scripts[_rng.Next(0, _scripts.Length)];
+                var script = _scripts[rng.Next(0, _scripts.Length)];
                 foreach (var phrase in script.GetPhrases(user))
                 {
                     await userMessage.Channel.SendMessageAsync(phrase);
