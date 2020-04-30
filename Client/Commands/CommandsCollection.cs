@@ -7,7 +7,7 @@ namespace PochinkiBot.Client.Commands
     {
         private class CommandCollectionNode
         {
-            public Dictionary<char, CommandCollectionNode> ChildNodes = new Dictionary<char, CommandCollectionNode>();
+            public readonly Dictionary<char, CommandCollectionNode> ChildNodes = new Dictionary<char, CommandCollectionNode>();
             public IBotCommand Command;
 
             public override string ToString()
@@ -24,6 +24,9 @@ namespace PochinkiBot.Client.Commands
             foreach (var command in commands)
             {
                 var attribute = command.GetType().GetCustomAttribute<CommandAttribute>();
+                if (attribute == null)
+                    continue;
+
                 var currentNode = _collectionRoot;
                 foreach (var c in attribute.Command)
                 {
