@@ -41,6 +41,7 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
         private readonly BotConfig _config;
         private readonly IRemoveRoleJob _removeRoleJob;
         private static readonly ILogger Logger = Log.ForContext<PlayRouletteCommand>();
+        private readonly Random _rng = new Random((int)DateTime.UtcNow.Ticks);
 
         public PlayRouletteCommand(DiscordSocketClient client,
             IRouletteStore rouletteStore,
@@ -68,11 +69,10 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
                 return;
             }
 
-            var rng = new Random((int)DateTime.UtcNow.Ticks);
             var cooldown = await _rouletteStore.UserRouletteCooldown(context.Guild.Id, userMessage.Author.Id);
             if (cooldown > TimeSpan.Zero)
             {
-                var phrase = CooldownPhrases[rng.Next(CooldownPhrases.Length)] + cooldown.FormatForMessage();
+                var phrase = CooldownPhrases[_rng.Next(CooldownPhrases.Length)] + cooldown.FormatForMessage();
                 var reply = await userMessage.Channel.SendMessageAsync(phrase);
                 await MessageUtilities.DeleteMessagesAsync(5, reply, userMessage);
                 return;
@@ -80,11 +80,11 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
 
             var now = DateTime.Now;
             var isAprilFools = now.Day == 1 && now.Month == 4;
-            var value = _botDeveloperProvider.IsUserDeveloper(userMessage.Author.Id) ? 1 : isAprilFools ? 6 : rng.Next(0, 600);
+            var value = _botDeveloperProvider.IsUserDeveloper(userMessage.Author.Id) ? 1 : isAprilFools ? 6 : _rng.Next(0, 600);
             string result;
             if (value % 6 == 0)
             {
-                result = isAprilFools ? "**С ПЕРВЫМ АПРЕЛЯ, МУДИЛА!**" : WinPhrases[rng.Next(WinPhrases.Length)];
+                result = isAprilFools ? "**С ПЕРВЫМ АПРЕЛЯ, МУДИЛА!**" : WinPhrases[_rng.Next(WinPhrases.Length)];
                 await _rouletteStore.IncrementRouletteWins(context.Guild.Id, userMessage.Author.Id);
                 if (userMessage.Author is SocketGuildUser user)
                 {
@@ -97,7 +97,7 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
             }
             else
             {
-                result = LosePhrases[rng.Next(LosePhrases.Length)];
+                result = LosePhrases[_rng.Next(LosePhrases.Length)];
                 await _rouletteStore.IncrementRouletteLoses(context.Guild.Id, userMessage.Author.Id);
             }
 
