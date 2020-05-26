@@ -43,6 +43,14 @@ namespace PochinkiBot.Repositories.Implementations
             return _redisDatabaseProvider.Database.StringSetAsync(GuildCooldownKey(guildId, userId), "1", expiry);
         }
 
+        public async Task<(int Wins, int Loses)> GetUserStat(ulong guildId, ulong userId)
+        {
+            var userWins = await _redisDatabaseProvider.Database.HashGetAsync(GuildWinsStatsKey(guildId), userId);
+            var userLoses = await _redisDatabaseProvider.Database.HashGetAsync(GuildLosesStatsKey(guildId), userId);
+
+            return (userWins.HasValue ? (int) userWins : 0, userLoses.HasValue ? (int) userLoses : 0);
+        }
+
         public async Task<Dictionary<ulong, (int Wins, int Loses)>> GetGuildStats(ulong guildId, int count)
         {
             var userWins = await _redisDatabaseProvider.Database.HashGetAllAsync(GuildWinsStatsKey(guildId));
