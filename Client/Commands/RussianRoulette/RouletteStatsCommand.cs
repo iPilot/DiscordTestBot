@@ -41,6 +41,7 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
             else
             {
                 var z = stat
+                    .Where(s => s.Value.Wins + s.Value.Loses >= 3)
                     .Select(s => (s.Value, context.Guild.GetUser(s.Key)))
                     .Where(s => s.Item2 != null)
                     .OrderByDescending(s => Math.Round((double)s.Value.Wins / (s.Value.Wins + s.Value.Loses), 1))
