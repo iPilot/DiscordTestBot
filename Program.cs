@@ -15,6 +15,7 @@ using PochinkiBot.Misc;
 using PochinkiBot.Repositories.Implementations;
 using PochinkiBot.Repositories.Interfaces;
 using Serilog;
+using Serilog.Events;
 
 namespace PochinkiBot
 {
@@ -87,6 +88,7 @@ namespace PochinkiBot
 
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
+                .MinimumLevel.Override("Hangfire", LogEventLevel.Information)
                 .WriteTo.Console()
                 .CreateLogger();
 
