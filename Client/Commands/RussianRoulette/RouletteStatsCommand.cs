@@ -28,7 +28,7 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
             if (string.IsNullOrWhiteSpace(countArg))
                 countArg = "5";
 
-            string message;
+            string message = null;
             if (!int.TryParse(countArg, out var count))
             {
                 await userMessage.DeleteAsync();
@@ -36,9 +36,7 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
             }
 
             count = Math.Max(5, count);
-            if (stat.Count == 0)
-                message = $"Пусто... сыграйте \"{_client.CurrentUser.Mention} рулетка!\"";
-            else
+            if (stat.Count > 0)
             {
                 var z = stat
                     .Where(s => s.Value.Wins + s.Value.Loses >= 3)
@@ -57,6 +55,9 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
                     });
                 message = string.Join(Environment.NewLine, z);
             }
+
+            if (string.IsNullOrWhiteSpace(message))
+                message = $"Пусто... сыграйте \"{_client.CurrentUser.Mention} рулетка!\"";
 
             var reply = await userMessage.Channel.SendMessageAsync(message);
             await MessageUtilities.DeleteMessagesAsync(15, userMessage, reply);
