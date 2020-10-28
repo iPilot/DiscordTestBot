@@ -25,7 +25,6 @@ namespace PochinkiBot.Client.Commands.DailyPidor
         private readonly IBackgroundJobClient _backgroundJobClient;
         private readonly BotConfig _config;
         private readonly IDailyPidorScript[] _scripts;
-        private readonly IRemoveRoleJob _removeRoleJob;
         private bool _pidorSearchActive;
         private readonly ILogger _logger = Log.Logger;
 
@@ -33,15 +32,13 @@ namespace PochinkiBot.Client.Commands.DailyPidor
             IPidorStore pidorStore, 
             IBackgroundJobClient backgroundJobClient,
             IEnumerable<IDailyPidorScript> scripts,
-            BotConfig config,
-            IRemoveRoleJob removeRoleJob)
+            BotConfig config)
         {
             _client = client;
             _pidorStore = pidorStore;
             _backgroundJobClient = backgroundJobClient;
             _config = config;
             _scripts = scripts.ToArray();
-            _removeRoleJob = removeRoleJob;
         }
 
         public async Task Execute(SocketUserMessage userMessage, int argsPos)
@@ -113,7 +110,7 @@ namespace PochinkiBot.Client.Commands.DailyPidor
                 {
                     _logger.Information("Added role \"{0}\" to user \"{1}\" at server \"{2}\".", role.Name, user.Username, context.Guild.Name);
                     await user.AddRoleAsync(role, new RequestOptions {AuditLogReason = "Пидор дня!"});
-                    _backgroundJobClient.Schedule(() => _removeRoleJob.RemoveRole(context.Guild.Id, user.Id, role.Id, "Больше не пидор дня!"), pidorOfTheDayExpires);
+                    _backgroundJobClient.Schedule<IRemoveRoleJob>(j => j.RemoveRole(context.Guild.Id, user.Id, role.Id, "Больше не пидор дня!"), pidorOfTheDayExpires);
                 }
             }
             finally

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace PochinkiBot.Repositories.Interfaces
 {
-    public interface IPidorStore : IRedisStore
+    public interface IPidorStore
     {
         Task<ulong?> GetCurrentGuildPidor(ulong guildId);
         Task<TimeSpan> SetGuildPidor(ulong guildId, ulong userId);

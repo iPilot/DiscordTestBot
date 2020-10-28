@@ -39,7 +39,6 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
         private readonly IBackgroundJobClient _backgroundJobClient;
         private readonly IBotDeveloperProvider _botDeveloperProvider;
         private readonly BotConfig _config;
-        private readonly IRemoveRoleJob _removeRoleJob;
         private static readonly ILogger Logger = Log.ForContext<PlayRouletteCommand>();
         private readonly Random _rng = new Random((int)DateTime.UtcNow.Ticks);
 
@@ -47,15 +46,13 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
             IRouletteStore rouletteStore,
             IBackgroundJobClient backgroundJobClient,
             IBotDeveloperProvider botDeveloperProvider,
-            BotConfig config,
-            IRemoveRoleJob removeRoleJob)
+            BotConfig config)
         {
             _client = client;
             _rouletteStore = rouletteStore;
             _backgroundJobClient = backgroundJobClient;
             _botDeveloperProvider = botDeveloperProvider;
             _config = config;
-            _removeRoleJob = removeRoleJob;
         }
 
         public async Task Execute(SocketUserMessage userMessage, int argsPos)
@@ -108,7 +105,7 @@ namespace PochinkiBot.Client.Commands.RussianRoulette
                 Logger.Information("Added role \"{0}\" to user \"{1}\" at server \"{2}\".", role.Name, user.Username, context.Guild.Name);
                 await user.AddRoleAsync(role, new RequestOptions {AuditLogReason = "Застрелился!"});
                 var expiry = TimeSpan.FromSeconds(_config.RussianRoulette.WinnerDurationSeconds);
-                _backgroundJobClient.Schedule(() => _removeRoleJob.RemoveRole(context.Guild.Id, user.Id, role.Id, "Жив, цел, орёл!"), expiry);
+                _backgroundJobClient.Schedule<IRemoveRoleJob>(j => j.RemoveRole(context.Guild.Id, user.Id, role.Id, "Жив, цел, орёл!"), expiry);
                 
             }
 
