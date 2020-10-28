@@ -8,7 +8,7 @@ using StackExchange.Redis;
 
 namespace PochinkiBot.Repositories.Implementations
 {
-    public class PidorStore : IPidorStore
+    public class PidorStore : IPidorStore, IRedisStore
     {
         private readonly IRedisDatabaseProvider _redisDatabase;
         private readonly BotConfig _configuration;

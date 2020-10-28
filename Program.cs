@@ -63,6 +63,7 @@ namespace PochinkiBot
             services.AddSingleton<DiscordClient>();
             services.AddSingleton<IBackgroundJobClient, BackgroundJobClient>();
             services.AddSingleton<ICommandCollection, CommandCollection>();
+            services.AddSingleton<ICommandArgsParser, CommandArgsParser>();
             
             services.Scan(s => s.FromApplicationDependencies()
                 .AddClasses(c => c.AssignableTo<IRedisStore>())

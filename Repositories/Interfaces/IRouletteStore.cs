@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace PochinkiBot.Repositories.Interfaces
 {
-    public interface IRouletteStore : IRedisStore
+    public interface IRouletteStore
     {
         Task IncrementRouletteLoses(ulong guildId, ulong userId);
         Task IncrementRouletteWins(ulong guildId, ulong userId);

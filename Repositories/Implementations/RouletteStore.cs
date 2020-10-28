@@ -6,7 +6,7 @@ using PochinkiBot.Repositories.Interfaces;
 
 namespace PochinkiBot.Repositories.Implementations
 {
-    public class RouletteStore : IRouletteStore
+    public class RouletteStore : IRouletteStore, IRedisStore
     {
         private static string GuildWinsStatsKey(ulong guildId) => $"RussianRoulette:Stats:{guildId}:Wins";
         private static string GuildLosesStatsKey(ulong guildId) => $"RussianRoulette:Stats:{guildId}:Loses";

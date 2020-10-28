@@ -8,6 +8,7 @@ using PochinkiBot.Repositories.Interfaces;
 namespace PochinkiBot.Client.Commands.RussianRoulette
 {
     [Command("ковбои")]
+    [CommandArg("count", typeof(int), 10)]
     public class RouletteStatsCommand : IBotCommand
     {
         private readonly DiscordSocketClient _client;
