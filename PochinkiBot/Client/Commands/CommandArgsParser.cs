@@ -72,7 +72,7 @@ namespace PochinkiBot.Client.Commands
                             : JToken.Parse(args[i++]).ToObject(attribute.Type);
                     _initialization[typeof(T)][attribute.Name](result, v);
                 }
-                catch (JsonException e)
+                catch (JsonException)
                 {
                     return null;
                 }
