@@ -2,20 +2,19 @@
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
-EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["FaryBotHost/FaryBotHost.csproj", "FaryBotHost/"]
-RUN dotnet restore "FaryBotHost/FaryBotHost.csproj"
+COPY ["FilmsBot/FilmsBot.csproj", "FilmsBot/"]
+RUN dotnet restore "FilmsBot/FilmsBot.csproj"
 COPY . .
-WORKDIR "/src/FaryBotHost"
-RUN dotnet build "FaryBotHost.csproj" -c Release -o /app/build
+WORKDIR "/src/FilmsBot"
+RUN dotnet build "FilmsBot.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "FaryBotHost.csproj" -c Release -o /app/publish
+RUN dotnet publish "FilmsBot.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "FaryBotHost.dll"]
+ENTRYPOINT ["dotnet", "FilmsBot.dll"]

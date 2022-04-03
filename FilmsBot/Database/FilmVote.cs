@@ -24,6 +24,9 @@ namespace FilmsBot.Database
         [Column("AMOUNT")]
         public int Amount { get; set; }
 
+        [Column("DATE")]
+        public DateTime Date { get; set; }
+
         #region Relations
 
         public virtual Participant? Participant { get; set; }

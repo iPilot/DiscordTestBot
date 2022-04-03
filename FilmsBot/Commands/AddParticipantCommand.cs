@@ -1,29 +1,23 @@
 ﻿using Discord.WebSocket;
 using FilmsBot.Commands.Abstractions;
 using FilmsBot.Database;
-using Microsoft.EntityFrameworkCore;
 
 namespace FilmsBot.Commands
 {
-    public class AddParticipantCommand : SlashSubCommandBase<FilmsCommand>
+    public class AddParticipantCommand : DbInteractionSubCommand<FilmsCommand, FilmsBotDbContext>
     {
-        private readonly IServiceScopeFactory _scopeFactory;
         public override string Name => "смотреть";
         protected override string Description => "Стать смотрящим фильмы";
 
-        public AddParticipantCommand(IServiceScopeFactory scopeFactory)
+        public AddParticipantCommand(IServiceScopeFactory scopeFactory) : base(scopeFactory)
         {
-            _scopeFactory = scopeFactory;
         }
 
-        public override async Task HandleCommand(SocketSlashCommand command, SocketSlashCommandDataOption options)
+        protected override async Task<string?> HandleCommandInternal(IServiceProvider serviceProvider, FilmsBotDbContext db, SocketSlashCommand command, SocketSlashCommandDataOption options)
         {
-            using var scope = _scopeFactory.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<FilmsBotDbContext>();
             if (await db.Participants.FindAsync(command.User.Id) != null)
             {
-                await command.DeleteOriginalResponseAsync();
-                return;
+                return "Уже смотрящий!";
             }
 
             db.Participants.Add(new Participant
@@ -32,16 +26,7 @@ namespace FilmsBot.Commands
                 JoinedAt = DateTime.UtcNow
             });
 
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                await command.RespondAsync("Db error");
-            }
-
-            await command.RespondAsync("ОК");
+            return null;
         }
     }
 }

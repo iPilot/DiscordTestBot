@@ -18,11 +18,11 @@ namespace FilmsBot.Commands.Abstractions
         {
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<TContext>();
-
-            string r;
+            
+            string? r;
             try
             {
-                r = await HandleCommandInternal(scope, db, command, options);
+                r = await HandleCommandInternal(scope.ServiceProvider, db, command, options);
             }
             catch (Exception)
             {
@@ -45,9 +45,10 @@ namespace FilmsBot.Commands.Abstractions
                 await command.RespondAsync("DB ERROR");
             }
 
-            await command.RespondAsync("ОК");
+            if (!command.HasResponded)
+                await command.RespondAsync("ОК");
         }
 
-        protected abstract Task<string> HandleCommandInternal(IServiceScope scope, TContext db, SocketSlashCommand command, SocketSlashCommandDataOption options);
+        protected abstract Task<string?> HandleCommandInternal(IServiceProvider serviceProvider, TContext db, SocketSlashCommand command, SocketSlashCommandDataOption options);
     }
 }

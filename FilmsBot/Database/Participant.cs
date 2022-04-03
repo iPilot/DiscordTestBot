@@ -20,6 +20,7 @@ namespace FilmsBot.Database
         public virtual List<Film>? Films { get; set; }
         public virtual List<FilmVote>? Votes { get; set; }
         public virtual List<FilmRating>? Ratings { get; set; }
+        public virtual List<Session>? Sessions { get; set; }
 
         #endregion
 

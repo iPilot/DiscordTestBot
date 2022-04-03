@@ -19,10 +19,17 @@ namespace FilmsBot.Database
         [Column("FILM_ID")]
         public long? FilmId { get; set; }
 
+        [Column("GUILD_ID")]
+        public ulong GuildId { get; set; }
+
+        [Column("CREATED_BY")]
+        public ulong CreatedBy { get; set; }
+
         #region Relations
         
         public virtual List<FilmVote>? Votes { get; set; }
         public virtual Film? Film { get; set; }
+        public virtual Participant? Creator { get; set; }
 
         #endregion
 
@@ -40,6 +47,15 @@ namespace FilmsBot.Database
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.Restrict)
                     .HasConstraintName("FK_FILM_SESSION_FILM_ID");
+
+                builder
+                    .HasOne(s => s.Creator)
+                    .WithMany(p => p.Sessions)
+                    .HasForeignKey(s => s.CreatedBy)
+                    .HasPrincipalKey(p => p.Id)
+                    .IsRequired()
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK_FILM_SESSION_CREATOR_ID");
             }
         }
 

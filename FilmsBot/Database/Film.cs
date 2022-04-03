@@ -20,16 +20,20 @@ namespace FilmsBot.Database
         public int? Year { get; set; }
 
         [Column("ADDED_BY_ID")]
-        public ulong? AddedById { get; set; }
+        public ulong AddedById { get; set; }
 
         [Column("GUILD_ID")]
-        public ulong? GuildId { get; set; }
+        public ulong GuildId { get; set; }
+
+        [Column("ADDED_AT")]
+        public DateTime AddedAt { get; set; }
 
         #region Relations
 
         public virtual Participant? AddedBy { get; set; }
         public virtual List<FilmVote>? Votes { get; set; }
         public virtual Session? Session { get; set; }
+        public virtual List<FilmRating>? Ratings { get; set; }
 
         #endregion
 
@@ -50,5 +54,10 @@ namespace FilmsBot.Database
         }
 
         #endregion
+
+        public string Format()
+        {
+            return Year.HasValue ? $"{Name} ({Year})" : Name;
+        }
     }
 }

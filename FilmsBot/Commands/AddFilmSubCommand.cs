@@ -1,5 +1,4 @@
-﻿#nullable disable
-using Discord;
+﻿using Discord;
 using Discord.WebSocket;
 using FilmsBot.Commands.Abstractions;
 using FilmsBot.Database;
@@ -13,16 +12,33 @@ namespace FilmsBot.Commands
         public override string Name => "добавить";
         protected override string Description => "Добавление нового фильма в список";
 
+        private readonly CommandOptionHandler<string> _nameOption = new("название", "Название фильма", ApplicationCommandOptionType.String);
+        private readonly CommandOptionHandler<int?> _yearOption = new("год", "Год выхода фильма", ApplicationCommandOptionType.Integer);
+
         public AddFilmSubCommand(IServiceScopeFactory scopeFactory) : base(scopeFactory)
         {
         }
 
-        protected override async Task<string> HandleCommandInternal(IServiceScope scope, FilmsBotDbContext db, SocketSlashCommand command, SocketSlashCommandDataOption options)
+        protected override SlashCommandOptionBuilder ConfigureSubCommand(SlashCommandOptionBuilder builder)
         {
+            return builder
+                .AddOption(_nameOption.GetBuilder(b => b.WithRequired(true)))
+                .AddOption(_yearOption.GetBuilder(b => b.WithRequired(false).WithMinValue(1900).WithMaxValue(2100)));
+        }
+
+        protected override async Task<string?> HandleCommandInternal(
+            IServiceProvider serviceProvider,
+            FilmsBotDbContext db,
+            SocketSlashCommand command, 
+            SocketSlashCommandDataOption options)
+        {
+            if (command.Channel is not IGuildChannel guildChannel)
+                return "Не на сервере";
+
             var name = options.GetOptionValue<string>("название").Trim();
             var year = options.GetOptionValue<int?>("год");
 
-            if (await db.Films.AnyAsync(f => f.Name == name && f.Year == year))
+            if (await db.Films.AnyAsync(f => f.Name == name && f.Year == year && f.GuildId == guildChannel.GuildId))
                 return "Уже добавлено";
 
             var user = await db.Participants.FindAsync(command.User.Id);
@@ -38,32 +54,17 @@ namespace FilmsBot.Commands
 
             var film = new Film
             {
-                GuildId = command.Channel is IGuildChannel g ? g.GuildId : null,
+                GuildId = guildChannel.GuildId,
                 Name = name,
                 AddedBy = user,
-                Year = year
+                Year = year,
+                AddedAt = DateTime.UtcNow
             };
 
             db.Films.Add(film);
 
             return null;
         }
-
-        protected override SlashCommandOptionBuilder ConfigureSubCommand(SlashCommandOptionBuilder builder)
-        {
-            return builder
-                .AddOption(new SlashCommandOptionBuilder()
-                    .WithName("название")
-                    .WithType(ApplicationCommandOptionType.String)
-                    .WithDescription("Название фильма")
-                    .WithRequired(true))
-                .AddOption(new SlashCommandOptionBuilder()
-                    .WithName("год")
-                    .WithType(ApplicationCommandOptionType.Integer)
-                    .WithMinValue(1900)
-                    .WithMaxValue(2100)
-                    .WithRequired(false)
-                    .WithDescription("Год выхода фильма"));
-        }
     }
+
 }

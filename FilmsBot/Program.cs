@@ -1,5 +1,4 @@
 using Discord.WebSocket;
-using FaryBotHost;
 using FilmsBot;
 using FilmsBot.Client;
 using FilmsBot.Commands.Abstractions;

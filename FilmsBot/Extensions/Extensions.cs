@@ -1,6 +1,7 @@
 ﻿#nullable disable
 using Discord;
 using Discord.WebSocket;
+using FilmsBot.Database;
 
 namespace FilmsBot.Extensions
 {
@@ -14,6 +15,24 @@ namespace FilmsBot.Extensions
                 return default;
 
             return MapByAppType<T>(obj.Type, obj.Value);
+        }
+
+        public static async Task<Participant> GetParticipant(this FilmsBotDbContext db, IUser user)
+        {
+            var p = await db.Participants.FindAsync(user.Id);
+
+            if (p == null)
+            {
+                p = new Participant
+                {
+                    Id = user.Id,
+                    JoinedAt = DateTime.UtcNow
+                };
+                db.Participants.Add(p);
+                await db.SaveChangesAsync();
+            }
+
+            return p;
         }
 
         private static T MapByAppType<T>(ApplicationCommandOptionType type, object value)

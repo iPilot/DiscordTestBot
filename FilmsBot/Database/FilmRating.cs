@@ -15,6 +15,9 @@ namespace FilmsBot.Database
         [Column("PARTICIPANT_ID")]
         public ulong ParticipantId { get; set; }
 
+        [Column("FILM_ID")]
+        public long FilmId { get; set; }
+
         [Column("RATING")]
         public double Rating { get; set; }
 
@@ -24,6 +27,7 @@ namespace FilmsBot.Database
         #region Relations
 
         public virtual Participant? Participant { get; set; }
+        public virtual Film? Film { get; set; }
 
         #endregion
 
@@ -40,7 +44,16 @@ namespace FilmsBot.Database
                     .HasPrincipalKey(p => p.Id)
                     .IsRequired()
                     .OnDelete(DeleteBehavior.Restrict)
-                    .HasConstraintName("FK_FILMS_RATINGS_PARTICIPANT_ID");
+                    .HasConstraintName("FK_FILM_RATING_PARTICIPANT_ID");
+
+                builder
+                    .HasOne(r => r.Film)
+                    .WithMany(f => f.Ratings)
+                    .HasForeignKey(r => r.FilmId)
+                    .HasPrincipalKey(f => f.Id)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired()
+                    .HasConstraintName("FK_FILM_RATING_FILM_ID");
             }
         }
 
