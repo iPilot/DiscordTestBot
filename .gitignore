@@ -342,4 +342,4 @@ config.json
 
 LocalDb/
 
-*/appsettings.Development.json
+*/appsettings.*.json
